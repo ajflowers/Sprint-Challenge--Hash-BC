@@ -14,7 +14,7 @@ class Ticket:
 
 def reconstruct_trip(tickets, length):
     hashtable = HashTable(length)
-    route = [None] * (length - 1)
+    route = [None] * length
 
 
     for leg in tickets:
@@ -27,4 +27,8 @@ def reconstruct_trip(tickets, length):
     for i in range(1, len(route)):
         route[i] = hash_table_retrieve(hashtable, route[i - 1])
 
-    return route    
+    if route[-1] == "NONE":
+        return route[:-1]
+    else:
+        print(f"ERROR: cannot generate valid route of length {length}")
+
