@@ -16,8 +16,19 @@ def reconstruct_trip(tickets, length):
     hashtable = HashTable(length)
     route = [None] * length
 
-    """
-    YOUR CODE HERE
-    """
 
-    pass
+    for leg in tickets:
+        #origin as key, destination as value        
+        hash_table_insert(hashtable, leg.source, leg.destination)
+
+    #ticket of origin "NONE" has destination as first city
+    route[0] = hash_table_retrieve(hashtable, "NONE")
+
+    for i in range(1, len(route)):
+        route[i] = hash_table_retrieve(hashtable, route[i - 1])
+
+    if route[-1] == "NONE":
+        return route[:-1]
+    else:
+        print(f"ERROR: cannot generate valid route of length {length}")
+
