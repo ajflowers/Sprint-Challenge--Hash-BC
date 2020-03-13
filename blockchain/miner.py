@@ -1,5 +1,6 @@
 import hashlib
 import requests
+from random import randint
 
 import sys
 
@@ -21,13 +22,20 @@ def proof_of_work(last_proof):
     """
 
     start = timer()
+    last_hash = hashlib.sha256(str(last_proof).encode()).hexdigest()
+    # print(last_hash)
 
     print("Searching for next proof")
-    proof = 0
-    #  TODO: Your code here
+    proof = randint(0,10000000)
+    for i in range(3000000):
+        if valid_proof(last_hash, proof):   
+            print("Proof found: " + str(proof) + " in " + str(timer() - start))
+            return proof
+        else:
+            proof += 1
 
-    print("Proof found: " + str(proof) + " in " + str(timer() - start))
-    return proof
+    print("valid proof not found, checking blockchain")
+    return False
 
 
 def valid_proof(last_hash, proof):
@@ -40,7 +48,11 @@ def valid_proof(last_hash, proof):
     """
 
     # TODO: Your code here!
-    pass
+    guess = str(proof).encode()
+    guess_hash = hashlib.sha256(guess).hexdigest()
+
+    return guess_hash[:6] == last_hash[-6:]
+
 
 
 if __name__ == '__main__':
@@ -65,16 +77,27 @@ if __name__ == '__main__':
     while True:
         # Get the last proof from the server
         r = requests.get(url=node + "/last_proof")
-        data = r.json()
+        # data = r.json()
+        try:
+            data = r.json()
+        except ValueError:
+            print("Error:  Non-json response")
+            print("Response returned:")
+            print(r)
+            break
+
+
+
         new_proof = proof_of_work(data.get('proof'))
+        
+        if new_proof:
+            post_data = {"proof": new_proof,
+                        "id": id}
 
-        post_data = {"proof": new_proof,
-                     "id": id}
-
-        r = requests.post(url=node + "/mine", json=post_data)
-        data = r.json()
-        if data.get('message') == 'New Block Forged':
-            coins_mined += 1
-            print("Total coins mined: " + str(coins_mined))
-        else:
-            print(data.get('message'))
+            r = requests.post(url=node + "/mine", json=post_data)
+            data = r.json()
+            if data.get('message') == 'New Block Forged':
+                coins_mined += 1
+                print("Total coins mined: " + str(coins_mined))
+            else:
+                print(data.get('message'))
