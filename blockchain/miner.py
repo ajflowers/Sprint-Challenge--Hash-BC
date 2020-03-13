@@ -27,7 +27,7 @@ def proof_of_work(last_proof):
 
     print("Searching for next proof")
     proof = randint(0,10000000)
-    for i in range(3000000):
+    for i in range(2000000):
         if valid_proof(last_hash, proof):   
             print("Proof found: " + str(proof) + " in " + str(timer() - start))
             return proof
